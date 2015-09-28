@@ -1,0 +1,17 @@
+{
+  "name": "gigacapsule_viewer",
+  "version": "1.0.0",
+  "description": "YMO Giga Capsule Viewer",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "electron"
+  ],
+  "author": "S.F.",
+  "license": "MIT",
+  "dependencies": {
+    "basicFFmpeg": "0.0.7"
+  }
+}
