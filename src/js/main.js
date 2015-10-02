@@ -37,6 +37,7 @@ function denodeify(nodeFunc){
     }
 }
 
+
 app.on('ready', function() {
   // Giga Capsule ディスクをチェックする
   // Windows のみ...

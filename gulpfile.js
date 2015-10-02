@@ -7,21 +7,21 @@ var CSS_RELEASE_DIR = './css';
 var JS_RELEASE_DIR = './js';
 
 var path = require('path');
-
 var gulp = require('gulp');
 var logger = require('gulp-logger');
 var watch = require('gulp-watch');
-var filter = require('gulp-filter');
 var postcss = require('gulp-postcss');
 var autoprefixer = require('autoprefixer');
 var atImport = require('postcss-import');
 var source = require('vinyl-source-stream');
 var babel = require('gulp-babel');
-
+var plumber = require('gulp-plumber');
+var sourcemaps = require('gulp-sourcemaps')
 
 // CSSのビルド
 gulp.task('postcss', function() {
     gulp.src(path.join(CSSNEXT_DIR, 'sfstyle.css'), { base: CSSNEXT_DIR })
+        .pipe(plumber())
         .pipe(postcss([
             atImport(),
             require('postcss-mixins')(),
@@ -38,8 +38,11 @@ gulp.task('postcss', function() {
 // JSのビルド
 gulp.task('js',function(){
     gulp.src(path.join(JS_SRC_DIR, '/**/*.js'))
+    .pipe(sourcemaps.init())
+    .pipe(plumber())
     .pipe(babel())
-    .pipe(gulp.dest('./js'));
+    .pipe(sourcemaps.write())
+    .pipe(gulp.dest(JS_RELEASE_DIR));
 });
 
 // ウォッチ
