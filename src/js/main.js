@@ -4,6 +4,10 @@ var app = require('app');
 var BrowserWindow = require('browser-window');
 var ipc = require('ipc');
 var fs = require('fs');
+var path = require('path');
+var cacheRoot = path.join(app.getPath('cache'),'sfpgmr');
+var cachePath = path.join(cacheRoot,'gigacapsule');
+var gigaCapsule = '';
 
 require('crash-reporter').start();
 
@@ -48,24 +52,41 @@ app.on('ready', function() {
             }
           }
         });
-        reject();
+        reject('Giga Capsule Disk Not Found.');
     });
   })
   .then((drive)=>{
     // Giga Capsuleのドライブ判明
-    console.log(drive);
+    gigaCapsule = path.join(drive,'/');
+    // キャッシュディレクトリ作成
+    return new Promise((resolve,reject) => {
+      try {
+        fs.mkdirSync(cacheRoot);
+      } catch (e) {
+        if(e.code !== 'EEXIST'){
+          reject(e.description);
+        }
+      }
+      try {
+        fs.mkdirSync(cachePath);
+      } catch (e) {
+        if(e.code !== 'EEXIST'){
+          reject(e.description);
+        }
+      }
+      resolve();
+    });
   })
-  .catch(()=>{
-    console.log('not found.');
+  .then(()=>{
+    // ブラウザ(Chromium)の起動, 初期画面のロード
+    mainWindow = new BrowserWindow({width: 800, height: 600});
+    mainWindow.loadUrl('file://' + __dirname + '/../index.html');
+    mainWindow.on('closed', function() {
+      mainWindow = null;
+    });
+  })
+  .catch((e)=>{
+    console.log(e);
   });
-  
   //app.quit();
-  
-
-  // ブラウザ(Chromium)の起動, 初期画面のロード
-  mainWindow = new BrowserWindow({width: 800, height: 600});
-  mainWindow.loadUrl('file://' + __dirname + '/../index.html');
-  mainWindow.on('closed', function() {
-    mainWindow = null;
-  });
 });

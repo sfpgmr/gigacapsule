@@ -1,9 +1,7 @@
   var remote = require('remote');
   var app = remote.require('app');
-  var path = app.getPath('cache');
   
-  console.log(path);
- 
+
   window.addEventListener('load',function(){
     d3.select('body')
       .append('video')

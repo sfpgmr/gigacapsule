@@ -2,9 +2,6 @@
 
 var remote = require('remote');
 var app = remote.require('app');
-var path = app.getPath('cache');
-
-console.log(path);
 
 window.addEventListener('load', function () {
   d3.select('body').append('video').attr({ src: '../gigacapsule/title.MP4', width: '100%', height: '100%', autoplay: 'autoplay', autobuffer: 'autobuffer' }).on('ended', function () {
