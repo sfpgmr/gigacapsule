@@ -12,8 +12,7 @@
   "author": "S.F.",
   "license": "MIT",
   "dependencies": {
-    "basicFFmpeg": "0.0.7",
-    "drivelist": "^1.3.0"
+    
   },
   "devDependencies": {
     "autoprefixer": "^6.0.0",
