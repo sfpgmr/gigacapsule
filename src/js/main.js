@@ -3,6 +3,7 @@
 var app = require('app');
 var BrowserWindow = require('browser-window');
 var ipc = require('ipc');
+ipc.setMaxListeners(0);
 var fs = require('fs');
 var path = require('path');
 var ffmpeg = require('basicFFmpeg');
@@ -67,35 +68,38 @@ app.on('ready', function() {
     gigaCapsule = path.join(drive,'/');
     console.log(gigaCapsule);
     // キャッシュディレクトリ作成
-    return mkdir(cacheRoot);
+    return Promise.resolve();
   })
-  .then(()=>{
-    return mkdir(cachePath);
-    },(e)=>{
-      if(e.code !== 'EEXIST'){
-        return Promise.reject(e);
-      } else {
-        return mkdir(cachePath);
-      }
-  })
-  .then(()=> Promise.resolve(),
-    (e)=>{
-      if(e.code !== 'EEXIST'){
-        Promise.reject(e);
-      } 
-      return Promise.resolve();
-    }
-  )
-  .then(()=>{
-    return mkdir(workPath)
-    .then(()=> Promise.resolve(),
-      (e) =>{
-        if(e.code !== 'EEXIST'){
-          Promise.reject(e);
-        } 
-        return Promise.resolve();
-      });
-  })
+  .then(makeDir(cacheRoot))
+  .then(makeDir(cachePath))
+  .then(makeDir(workPath))
+  // .then(()=>{
+  //   return mkdir(cachePath);
+  //   },(e)=>{
+  //     if(e.code !== 'EEXIST'){
+  //       return Promise.reject(e);
+  //     } else {
+  //       return mkdir(cachePath);
+  //     }
+  // })
+  // .then(()=> Promise.resolve(),
+  //   (e)=>{
+  //     if(e.code !== 'EEXIST'){
+  //       Promise.reject(e);
+  //     } 
+  //     return Promise.resolve();
+  //   }
+  // )
+  // .then(()=>{
+  //   return mkdir(workPath)
+  //   .then(()=> Promise.resolve(),
+  //     (e) =>{
+  //       if(e.code !== 'EEXIST'){
+  //         Promise.reject(e);
+  //       } 
+  //       return Promise.resolve();
+  //     });
+  // })
   .then(() => {
     return new Promise(function(resolve,reject){
     // ブラウザ(Chromium)の起動, 初期画面のロード
@@ -123,34 +127,35 @@ app.on('ready', function() {
   })
   // コンテンツの再生
   .then(()=>{
-    playVideo('/MOVIE/QT/TITLE');
-    playVideo('/MOVIE/QT/START_H'); 
-    playAudio('/MOVIE/SOUND/OPENING');
-    playAudio('/SAMPLING/03FIRECR/03_01');
-    playAudio('/SAMPLING/03FIRECR/03_02');
-    playAudio('/SAMPLING/03FIRECR/03_03');
-    playAudio('/SAMPLING/03FIRECR/03_04');
-    playAudio('/SAMPLING/03FIRECR/03_05');
-    // playAudio('/MOVIE/L1/SOUNDS/4_1');
-    // playAudio('/MOVIE/L1/SOUNDS/4_2');
-    // playAudio('/MOVIE/L1/SOUNDS/4_3');
-    // playAudio('/MOVIE/L1/SOUNDS/4_4');
-    //playAudio('/MOVIE/L1/SOUNDS/4_5');
-    // playAudio('/MOVIE/L1/SOUNDS/4_6');
-    //playAudio('/MOVIE/L1/SOUNDS/4_7');
-    //playAudio('/MOVIE/L1/SOUNDS/4_8');
+    // playVideo('/MOVIE/QT/TITLE');
+    // playVideo('/MOVIE/QT/START_H'); 
+    // playAudio('/MOVIE/SOUND/OPENING');
+    // playAudio('/SAMPLING/03FIRECR/03_01');
+    // playAudio('/SAMPLING/03FIRECR/03_02');
+    // playAudio('/SAMPLING/03FIRECR/03_03');
+    // playAudio('/SAMPLING/03FIRECR/03_04');
+    // playAudio('/SAMPLING/03FIRECR/03_05');
+    // playAudio('/MOVIE/L1/SOUNDS/12_7');
+    // playAudio('/MOVIE/L1/SOUNDS/12_8');
+    playAudio('/MOVIE/L1/SOUNDS/12_9');
+    playAudio('/MOVIE/L1/SOUNDS/12_10');
+    playAudio('/MOVIE/L1/SOUNDS/12_11');
+    playAudio('/MOVIE/L1/SOUNDS/12_12');
+    playAudio('/MOVIE/L1/SOUNDS/4_1');
+    playAudio('/MOVIE/L1/SOUNDS/4_2');
+    playAudio('/MOVIE/L1/SOUNDS/4_3');
+    playAudio('/MOVIE/L1/SOUNDS/4_4');
+    playAudio('/MOVIE/L1/SOUNDS/4_5');
+    playAudio('/MOVIE/L1/SOUNDS/4_6');
+    playAudio('/MOVIE/L1/SOUNDS/4_7');
+    playAudio('/MOVIE/L1/SOUNDS/4_8');
     playAudio('/MOVIE/L1/SOUNDS/12_1');
     playAudio('/MOVIE/L1/SOUNDS/12_2');
     playAudio('/MOVIE/L1/SOUNDS/12_3');
     playAudio('/MOVIE/L1/SOUNDS/12_4');
     playAudio('/MOVIE/L1/SOUNDS/12_5');
     playAudio('/MOVIE/L1/SOUNDS/12_6');
-    playAudio('/MOVIE/L1/SOUNDS/12_7');
-    playAudio('/MOVIE/L1/SOUNDS/12_8');
-    playAudio('/MOVIE/L1/SOUNDS/12_9');
-    playAudio('/MOVIE/L1/SOUNDS/12_10');
-    playAudio('/MOVIE/L1/SOUNDS/12_11');
-    playAudio('/MOVIE/L1/SOUNDS/12_12');
+
     return playPromises;
   }).then(()=>{
     console.log('play end.');
@@ -164,6 +169,19 @@ app.on('ready', function() {
   });
   //app.quit();
 });
+
+function makeDir(path){
+   return ()=>{
+    return mkdir(path)
+    .then(()=> Promise.resolve(),
+      (e) =>{
+        if(e.code !== 'EEXIST'){
+          Promise.reject(e);
+        } 
+        return Promise.resolve();
+      });
+   }  
+}
 
 // 動画ファイルのキャッシュ生成
 function makeMovCache(pathFlagment){
@@ -233,7 +251,7 @@ function makeCache(src,dest,option)
 function playVideo_(path){
   return new Promise((resolve,reject)=>{
     mainWindow.webContents.send('playVideo',path);
-    ipc.on('playVideoEnd',function(){
+    ipc.once('playVideoEnd',function(){
       resolve();
       console.log(path);
     });
@@ -244,7 +262,7 @@ function playVideo_(path){
 function playAudio_(path){
   return new Promise((resolve,reject)=>{
     mainWindow.webContents.send('playAudio',path);
-    ipc.on('playAudioEnd',function(){
+    ipc.once('playAudioEnd',function(){
       resolve();
       console.log(path);
     });
