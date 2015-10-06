@@ -1,0 +1,5 @@
+﻿/* @font-face kit by Fonts2u (http://www.fonts2u.com) */ @font-face {font-family:"Technodelic";src:url("../fonts/technodelic.eot?") format("eot"),url("../fonts/technodelic.woff") format("woff"),url("../fonts/technodelic.ttf") format("truetype"),url("../fonts/technodelic.svg#Technodelic") format("svg");font-weight:normal;font-style:normal;}
+
+* {
+	font-family: 'Technodelic';
+}

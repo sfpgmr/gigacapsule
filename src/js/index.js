@@ -11,6 +11,7 @@
         ipc.send('playVideoEnd',path);
       });
   });
+  
   ipc.on('playAudio',function(path){
     d3.select('body')
       .append('audio')

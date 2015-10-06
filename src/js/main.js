@@ -1,23 +1,28 @@
 'use strict';
 
-var app = require('app');
-var BrowserWindow = require('browser-window');
-var ipc = require('ipc');
-ipc.setMaxListeners(0);
-var fs = require('fs');
-var path = require('path');
-var ffmpeg = require('basicFFmpeg');
+import app from 'app';
+import denodeify from './denodeify';
+import BrowserWindow from 'browser-window';
+import ipc from 'ipc';
+import * as fs from 'fs';
+import * as path  from 'path';
+import makedir from './makedir';
+import { exec  as exec_ } from 'child_process';
+import crashReporter  from 'crash-reporter';
+import Player from './player';
+
+var access = denodeify(fs.access);
+var exec = denodeify(exec_);
+var playPromises = Promise.resolve(0);
+var cachePromises = Promise.resolve(0);
 var cacheRoot = path.join(app.getPath('cache'),'sfpgmr');
 var cachePath = path.join(cacheRoot,'gigacapsule');
 var workPath = path.join(cachePath,'work');
 var gigaCapsule = '';
-var mkdir = denodeify(fs.mkdir);
-var access = denodeify(fs.access);
-var exec = denodeify(require('child_process').exec);
-var playPromises = Promise.resolve(0);
-var cachePromises = Promise.resolve(0);
+var player;
 
-require('crash-reporter').start();
+ipc.setMaxListeners(0);
+crashReporter.start();
 
 var mainWindow = null;
 
@@ -25,25 +30,6 @@ app.on('window-all-closed', function() {
   if (process.platform != 'darwin')
     app.quit();
 });
-
-function denodeify(nodeFunc){
-    var baseArgs = Array.prototype.slice.call(arguments, 1);
-    return function() {
-        var nodeArgs = baseArgs.concat(Array.prototype.slice.call(arguments));
-        return new Promise((resolve, reject) => {
-            nodeArgs.push((error, data) => {
-                if (error) {
-                    reject(error);
-                } else if (arguments.length > 2) {
-                    resolve(Array.prototype.slice.call(arguments, 1));
-                } else {
-                    resolve(data);
-                }
-            });
-            nodeFunc.apply(null, nodeArgs);
-        });
-    }
-}
 
 
 app.on('ready', function() {
@@ -70,37 +56,13 @@ app.on('ready', function() {
     // キャッシュディレクトリ作成
     return Promise.resolve();
   })
-  .then(makeDir(cacheRoot))
-  .then(makeDir(cachePath))
-  .then(makeDir(workPath))
-  // .then(()=>{
-  //   return mkdir(cachePath);
-  //   },(e)=>{
-  //     if(e.code !== 'EEXIST'){
-  //       return Promise.reject(e);
-  //     } else {
-  //       return mkdir(cachePath);
-  //     }
-  // })
-  // .then(()=> Promise.resolve(),
-  //   (e)=>{
-  //     if(e.code !== 'EEXIST'){
-  //       Promise.reject(e);
-  //     } 
-  //     return Promise.resolve();
-  //   }
-  // )
-  // .then(()=>{
-  //   return mkdir(workPath)
-  //   .then(()=> Promise.resolve(),
-  //     (e) =>{
-  //       if(e.code !== 'EEXIST'){
-  //         Promise.reject(e);
-  //       } 
-  //       return Promise.resolve();
-  //     });
-  // })
+  .then(makedir(cacheRoot))
+  .then(makedir(cachePath))
+  .then(makedir(workPath))
   .then(() => {
+    // プレイヤー
+    player = new Player(gigaCapsule,cachePath,workPath);
+
     return new Promise(function(resolve,reject){
     // ブラウザ(Chromium)の起動, 初期画面のロード
       mainWindow = new BrowserWindow(
@@ -127,145 +89,136 @@ app.on('ready', function() {
   })
   // コンテンツの再生
   .then(()=>{
-    // playVideo('/MOVIE/QT/TITLE');
-    // playVideo('/MOVIE/QT/START_H'); 
-    // playAudio('/MOVIE/SOUND/OPENING');
-    // playAudio('/SAMPLING/03FIRECR/03_01');
-    // playAudio('/SAMPLING/03FIRECR/03_02');
-    // playAudio('/SAMPLING/03FIRECR/03_03');
-    // playAudio('/SAMPLING/03FIRECR/03_04');
-    // playAudio('/SAMPLING/03FIRECR/03_05');
-    // playAudio('/MOVIE/L1/SOUNDS/12_7');
-    // playAudio('/MOVIE/L1/SOUNDS/12_8');
-    playAudio('/MOVIE/L1/SOUNDS/12_9');
-    playAudio('/MOVIE/L1/SOUNDS/12_10');
-    playAudio('/MOVIE/L1/SOUNDS/12_11');
-    playAudio('/MOVIE/L1/SOUNDS/12_12');
-    playAudio('/MOVIE/L1/SOUNDS/4_1');
-    playAudio('/MOVIE/L1/SOUNDS/4_2');
-    playAudio('/MOVIE/L1/SOUNDS/4_3');
-    playAudio('/MOVIE/L1/SOUNDS/4_4');
-    playAudio('/MOVIE/L1/SOUNDS/4_5');
-    playAudio('/MOVIE/L1/SOUNDS/4_6');
-    playAudio('/MOVIE/L1/SOUNDS/4_7');
-    playAudio('/MOVIE/L1/SOUNDS/4_8');
-    playAudio('/MOVIE/L1/SOUNDS/12_1');
-    playAudio('/MOVIE/L1/SOUNDS/12_2');
-    playAudio('/MOVIE/L1/SOUNDS/12_3');
-    playAudio('/MOVIE/L1/SOUNDS/12_4');
-    playAudio('/MOVIE/L1/SOUNDS/12_5');
-    playAudio('/MOVIE/L1/SOUNDS/12_6');
+    [
+      '/MOVIE/QT/TITLE.MOV',
+      '/MOVIE/QT/START.MOV',
+'/SAMPLING/01LAFEMM/01_01.AIF',
+'/SAMPLING/01LAFEMM/01_02.AIF',
+'/SAMPLING/01LAFEMM/01_03.AIF',
+'/SAMPLING/01LAFEMM/01_04.AIF',
+'/SAMPLING/02MADPIE/02_01.AIF',
+'/SAMPLING/02MADPIE/02_02.AIF',
+'/SAMPLING/02MADPIE/02_03.AIF',
+'/SAMPLING/02MADPIE/02_04.AIF',
+'/SAMPLING/03FIRECR/03_01.AIF',
+'/SAMPLING/03FIRECR/03_02.AIF',
+'/SAMPLING/03FIRECR/03_03.AIF',
+'/SAMPLING/03FIRECR/03_04.AIF',
+'/SAMPLING/03FIRECR/03_05.AIF',
+'/SAMPLING/04TONGPO/04_01.AIF',
+'/SAMPLING/04TONGPO/04_02.AIF',
+'/SAMPLING/04TONGPO/04_03.AIF',
+'/SAMPLING/04TONGPO/04_04.AIF',
+'/SAMPLING/04TONGPO/04_05.AIF',
+'/SAMPLING/04TONGPO/04_06.AIF',
+'/SAMPLING/05SIMOON/05_01.AIF',
+'/SAMPLING/05SIMOON/05_02.AIF',
+'/SAMPLING/05SIMOON/05_03.AIF',
+'/SAMPLING/05SIMOON/05_04.AIF',
+'/SAMPLING/05SIMOON/05_05.AIF',
+'/SAMPLING/05SIMOON/05_06.AIF',
+'/SAMPLING/05SIMOON/05_07.AIF',
+'/SAMPLING/05SIMOON/05_08.AIF',
+'/SAMPLING/06COSMIC/06_01.AIF',
+'/SAMPLING/06COSMIC/06_02.AIF',
+'/SAMPLING/07RYDEEN/07_01.AIF',
+'/SAMPLING/07RYDEEN/07_02.AIF',
+'/SAMPLING/07RYDEEN/07_03.AIF',
+'/SAMPLING/07RYDEEN/07_04.AIF',
+'/SAMPLING/07RYDEEN/07_05.AIF',
+'/SAMPLING/08TECHNO/08_01.AIF',
+'/SAMPLING/08TECHNO/08_02.AIF',
+'/SAMPLING/08TECHNO/08_03.AIF',
+'/SAMPLING/08TECHNO/08_04.AIF',
+'/SAMPLING/09BEHIND/09_01.AIF',
+'/SAMPLING/09BEHIND/09_02.AIF',
+'/SAMPLING/09BEHIND/09_03.AIF',
+'/SAMPLING/10CASTAL/10_01.AIF',
+'/SAMPLING/10CASTAL/10_02.AIF',
+'/SAMPLING/11SOLID/11_01.AIF',
+'/SAMPLING/11SOLID/11_02.AIF',
+'/SAMPLING/11SOLID/11_03.AIF',
+'/SAMPLING/11SOLID/11_04.AIF',
+'/SAMPLING/11SOLID/11_05.AIF',
+'/SAMPLING/11SOLID/11_06.AIF',
+'/SAMPLING/11SOLID/11_07.AIF',
+'/SAMPLING/12INSOMN/12_01.AIF',
+'/SAMPLING/12INSOMN/12_02.AIF',
+'/SAMPLING/13DAYTRI/13_01.AIF',
+'/SAMPLING/13DAYTRI/13_02.AIF',
+'/SAMPLING/13DAYTRI/13_03.AIF',
+'/SAMPLING/13DAYTRI/13_04.AIF',
+'/SAMPLING/14ABSOLU/14_01.AIF',
+'/SAMPLING/14ABSOLU/14_02.AIF',
+'/SAMPLING/14ABSOLU/14_03.AIF',
+'/SAMPLING/15MULTI/15_01.AIF',
+'/SAMPLING/16NICEAG/16_01.AIF',
+'/SAMPLING/16NICEAG/16_02.AIF',
+'/SAMPLING/17CITIZE/17_01.AIF',
+'/SAMPLING/18JINGLE/18_01.AIF',
+'/SAMPLING/19PRURJA/19_01.AIF',
+'/SAMPLING/19PRURJA/19_02.AIF',
+'/SAMPLING/19PRURJA/19_03.AIF',
+'/SAMPLING/19PRURJA/19_04.AIF',
+'/SAMPLING/19PRURJA/19_05.AIF',
+'/SAMPLING/19PRURJA/19_06.AIF',
+'/SAMPLING/20GRADAT/20_01.AIF',
+'/SAMPLING/20GRADAT/20_02.AIF',
+'/SAMPLING/21NEWTAN/21_01.AIF',
+'/SAMPLING/21NEWTAN/21_02.AIF',
+'/SAMPLING/21NEWTAN/21_03.AIF',
+'/SAMPLING/21NEWTAN/21_04.AIF',
+'/SAMPLING/21NEWTAN/21_05.AIF',
+'/SAMPLING/21NEWTAN/21_06.AIF',
+'/SAMPLING/21NEWTAN/21_07.AIF',
+'/SAMPLING/21NEWTAN/21_08.AIF',
+'/SAMPLING/22STAIRS/22_01.AIF',
+'/SAMPLING/22STAIRS/22_02.AIF',
+'/SAMPLING/23SEOULM/23_01.AIF',
+'/SAMPLING/23SEOULM/23_02.AIF',
+'/SAMPLING/23SEOULM/23_03.AIF',
+'/SAMPLING/23SEOULM/23_04.AIF',
+'/SAMPLING/24LIGHTI/24_01.AIF',
+'/SAMPLING/24LIGHTI/24_02.AIF',
+'/SAMPLING/25PROLOG/25_01.AIF',
+'/SAMPLING/25PROLOG/25_02.AIF',
+'/SAMPLING/25PROLOG/25_03.AIF',
+'/SAMPLING/26KEY/26_01.AIF',
+'/SAMPLING/26KEY/26_02.AIF',
+'/SAMPLING/26KEY/26_03.AIF',
+'/SAMPLING/26KEY/26_04.AIF',
+'/SAMPLING/27LIMBO/27_01.AIF',
+'/SAMPLING/28THEMAD/28_01.AIF',
+'/SAMPLING/28THEMAD/28_02.AIF',
+'/SAMPLING/28THEMAD/28_03.AIF',
+'/SAMPLING/29PERSPE/29_01.AIF'
+    ].forEach((p) => {
+      console.log(p);
+      player.play(mainWindow,p);
+    });
+    //player.playEnd();
 
-    return playPromises;
+    return player.playPromises;
   }).then(()=>{
-    console.log('play end.');
-    playPromises = Promise.resolve(0);
-    cachePromises = Promise.resolve(0);
+    console.log('play end?.');
+    setTimeout(function wait (){
+      console.log(player.count);
+      if(player.count){
+        setTimeout(wait,1000);
+      } else {
+        player.clear();
+      }
+    },500);
   })
   .catch((e)=>{
     var dialog = require('dialog');
     dialog.showErrorBox('Error',e);
+    if (process.platform != 'darwin')
+      app.quit();
 //    console.log(e);
   });
   //app.quit();
 });
 
-function makeDir(path){
-   return ()=>{
-    return mkdir(path)
-    .then(()=> Promise.resolve(),
-      (e) =>{
-        if(e.code !== 'EEXIST'){
-          Promise.reject(e);
-        } 
-        return Promise.resolve();
-      });
-   }  
-}
 
-// 動画ファイルのキャッシュ生成
-function makeMovCache(pathFlagment){
-  var pathSrc = path.join(gigaCapsule,pathFlagment + '.MOV');
-  var pathDest = path.join(cachePath,pathFlagment.replace(/\//ig,'_') + '.mp4');
-  return makeCache(pathSrc,pathDest);
-}
-
-// オーディオファイルのキャッシュ生成
-function makeAudioCache(pathFlagment){
-  var pathSrc = path.join(gigaCapsule,pathFlagment + '.AIF');
-  var pathDest = path.join(cachePath,pathFlagment.replace(/\//ig,'_') + '.opus');
-  return makeCache(pathSrc,pathDest);
-}
-
-// ビデオの再生
-function playVideo(path)
-{
-  var cachePromise = makeMovCache(path);
-  // Promiseのチェインを2つ（キャッシュチェイン、再生チェイン）作る
-  // 再生中に後続のデータのキャッシュを作れるようにするため
-
-  // キャッシュのチェイン
-  // 先行のキャッシュ生成が終わったらキャッシュ生成をシーケンシャルに行う
-  cachePromises = cachePromises.then(() => cachePromise);
-  // 再生のチェイン
-  // 先行の再生完了 -> キャッシュの生成終了まち -> 再生をシーケンシャルに行う
-  playPromises = playPromises.then(() => cachePromise).then(playVideo_);
-
-}
-
-// オーディオの再生
-function playAudio(path){
-  var cachePromise = makeAudioCache(path);
-  // Promiseのチェインを2つ（キャッシュチェイン、再生チェイン）作る
-  // 再生中に後続のデータのキャッシュを作れるようにするため
-
-  // キャッシュのチェイン
-  // 先行のキャッシュ生成が終わったらキャッシュ生成をシーケンシャルに行う
-  cachePromises = cachePromises.then(()=> cachePromise);
-  // 再生のチェイン
-  // 先行の再生完了 -> キャッシュの生成終了まち -> 再生をシーケンシャルに行う
-  playPromises = playPromises.then(() => cachePromise).then(playAudio_);
-}
-
-// コンテンツを再生可能な形式に変換し、キャッシュする
-function makeCache(src,dest,option)
-{
-    option = option || '';
-    return access(dest,fs.F_OK)
-    .then(()=> Promise.resolve(dest),// resolve
-      ()=>{// reject
-        // 作業中のファイルはテンポラリに保存
-        var tmpPath = path.join(workPath,path.basename(dest));
-        console.log(src,tmpPath);
-        // ffmpegでファイル変換
-        return exec('ffmpeg.exe -y -loglevel fatal -i ' + src + ' ' + option + ' ' + tmpPath)
-          // 変換からテンポラリから移動
-          .then(exec.bind(null,'cmd /c move /Y ' + tmpPath + ' ' + dest),(e)=>{console.log(e);})
-          // 変換後のファイル名を返す
-          .then(()=>Promise.resolve(dest));
-      }
-    );
-}
-
-// ビデオの再生
-function playVideo_(path){
-  return new Promise((resolve,reject)=>{
-    mainWindow.webContents.send('playVideo',path);
-    ipc.once('playVideoEnd',function(){
-      resolve();
-      console.log(path);
-    });
-  });
-}
-
-// オーディオの再生
-function playAudio_(path){
-  return new Promise((resolve,reject)=>{
-    mainWindow.webContents.send('playAudio',path);
-    ipc.once('playAudioEnd',function(){
-      resolve();
-      console.log(path);
-    });
-  });
-}
 

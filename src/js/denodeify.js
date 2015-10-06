@@ -1,6 +1,5 @@
 'use strict';
-module.exports = 
-function (nodeFunc){
+function denodeify (nodeFunc){
     var baseArgs = Array.prototype.slice.call(arguments, 1);
     return function() {
         var nodeArgs = baseArgs.concat(Array.prototype.slice.call(arguments));
@@ -18,3 +17,5 @@ function (nodeFunc){
         });
     }
 };
+
+export default denodeify;

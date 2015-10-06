@@ -20,7 +20,7 @@ var sourcemaps = require('gulp-sourcemaps')
 
 // CSSのビルド
 gulp.task('postcss', function() {
-    gulp.src(path.join(CSSNEXT_DIR, 'sfstyle.css'), { base: CSSNEXT_DIR })
+    gulp.src(path.join(CSSNEXT_DIR, '/**/*.css'), { base: CSSNEXT_DIR })
         .pipe(plumber())
         .pipe(postcss([
             atImport(),
