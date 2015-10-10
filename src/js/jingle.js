@@ -52,15 +52,18 @@ window.onload = ()=>{
 }
 
 class Track extends EventEmitter {
-	constructor(array)
+	constructor(array,latency)
 	{
+		latency = latency || 0;
 		super();
 		this.seqData = array;
 		this.seqCounter = 0;
+		this.latency = latency;
 	}
 	
 	sequence(currentTime) {
 		var len = this.seqData.length;
+		currentTime -= this.latency;
 		while (len > this.seqCounter) {
 			var seq = this.seqData[this.seqCounter];
 			if (seq[0] <= currentTime) {
@@ -82,10 +85,13 @@ class Tracks extends EventEmitter {
 		this.tracks = [];
 		this.endTrackCount = 0;
 		this.end = false;
+		this.latency = 0;
 	}
 	
-	addTrack(array){
-		var track = new Track(array);
+	addTrack(array,latency){
+		latency = latency || 0;
+		this.latency = latency;
+		var track = new Track(array,latency);
 		this.tracks.push(track);
 		track.on('end',()=>{
 			++this.endTrackCount;
@@ -179,29 +185,51 @@ tracks.addTrack([
 ]);
 
 tracks.addTrack([
+	[0.5,text(10,450,'Jingle Y.M.O.','white','120px','sagoe')],
+	[2.930,text(10,450,'Koyoi Anata To','red','120px','sagoe')],
 	[4.198,text(10,150,'Music','red','160px','sagoe')],
+	[4.549,text(10,300,'Snake is here.','white','120px')],
 	[4.838,text(500,200,'Music','red','140px')],
 	[5.394,text(200,250,'Music','red','130px')],
 	[5.980,text(600,300,'Music','red','120px')],
 	[6.775,text(200,500,'Show!','red','240px')],
+	[7.367,text(10,300,'Oh!,','White','380px')],
+	[8.047,text(10,500,'the hottest thing','White','100px')],
+	[8.810,text(10,600,'of the world.','White','100px')],
+	[9.900,text(10,150,'Yellow ','White','200px')],
+	[11.132,text(10,350,'Magic ','White','200px')],
 	[11.343,text(200,400,'Music','red','240px')],
+	[12.072,text(10,550,'Orchestra','White','200px')],
 	[12.941,text(200,600,'Music','red','240px')],
-	[14.518,text(250,550,'Y','red','580px')],
-	[15.117,text(250,550,'M','red','580px')],
-	[15.713,text(250,550,'O','red','580px')]
-]);
+	[14.518,text(10,450,'Y.','red','320px',null,5000)],
+	[15.117,text(350,450,'M.','red','320px',null,5000)],
+	[15.713,text(690,450,'O.','red','320px',null,5000)],
+	[16.456,text(10,150,'Y.M.O.','White','200px')],
+	[17.394,text(10,310,'ready to','White','200px')],
+	[17.854,text(10,550,'lay on you!','White','200px')]
+],-0.15);
 
 var fontCache;
 
-function text(x,y,mes,color,size,font){
+function text(x,y,mes,color,size,font,duration){
 	return () => {
+		duration = duration || 2500;
+		var scale = 3.0;
 		fontCache = font || fontCache || '';
-		svg.append('text')
-			.attr({x:x,y:y,fill:color,opacity:1.0})
+		var text = svg.append('text')
+			.attr({x:x,y:y,fill:color,'text-anchor':'start',opacity:0.0,transform: 'scale(1.0)'})
 			.style({'font-size':size,'font-family':fontCache})
-			.text(mes)
+			.text(mes);
+			var box = text.node().getBBox();
+			console.log(box.width + ' ' + box.height);
+			var dx = box.width ;
+			var dy = box.height;
+			text.attr({x:x,y:y,fill:color,opacity:1.0,transform: 'translate(' + dx + ',' + dy + '),scale(' + scale + '),translate(' + (-dx) + ',' + (-dy) + ')'})
 			.transition()
-			.duration(1000)
+			.duration(500)
+			.attr({x:x,y:y,transform:'scale(1.0) translate(0 0)'})
+			.transition()
+			.duration(duration)
 			.attr({opacity:0.0})
 			.remove();
 	};
@@ -279,8 +307,8 @@ function hihat(){
 	.delay(332)
 	.attr('opacity',0.6);
 
-	var x = Math.random() * 1024;
-	var y = Math.random() * 768;
+	x = Math.random() * 1024;
+	y = Math.random() * 768;
 	
 	g.attr({opacity:0.5})
 	.transition()
