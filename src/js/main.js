@@ -74,7 +74,9 @@ app.on('ready', function() {
           'auto-hide-menu-bar': true,
           'title':'YMO Giga Capusle Viewer',
           'web-preferences':{
-            'direct-write': true
+            'direct-write': true,
+            'webgl':true,
+            'webaudio':true
           }
         }
       );
@@ -87,128 +89,32 @@ app.on('ready', function() {
       });    
     });
   })
-  // コンテンツの再生
+  // オープニングコンテンツの再生
   .then(()=>{
     [
-      '/MOVIE/QT/TITLE.MOV',
-      '/MOVIE/QT/START.MOV',
-'/SAMPLING/01LAFEMM/01_01.AIF',
-'/SAMPLING/01LAFEMM/01_02.AIF',
-'/SAMPLING/01LAFEMM/01_03.AIF',
-'/SAMPLING/01LAFEMM/01_04.AIF',
-'/SAMPLING/02MADPIE/02_01.AIF',
-'/SAMPLING/02MADPIE/02_02.AIF',
-'/SAMPLING/02MADPIE/02_03.AIF',
-'/SAMPLING/02MADPIE/02_04.AIF',
-'/SAMPLING/03FIRECR/03_01.AIF',
-'/SAMPLING/03FIRECR/03_02.AIF',
-'/SAMPLING/03FIRECR/03_03.AIF',
-'/SAMPLING/03FIRECR/03_04.AIF',
-'/SAMPLING/03FIRECR/03_05.AIF',
-'/SAMPLING/04TONGPO/04_01.AIF',
-'/SAMPLING/04TONGPO/04_02.AIF',
-'/SAMPLING/04TONGPO/04_03.AIF',
-'/SAMPLING/04TONGPO/04_04.AIF',
-'/SAMPLING/04TONGPO/04_05.AIF',
-'/SAMPLING/04TONGPO/04_06.AIF',
-'/SAMPLING/05SIMOON/05_01.AIF',
-'/SAMPLING/05SIMOON/05_02.AIF',
-'/SAMPLING/05SIMOON/05_03.AIF',
-'/SAMPLING/05SIMOON/05_04.AIF',
-'/SAMPLING/05SIMOON/05_05.AIF',
-'/SAMPLING/05SIMOON/05_06.AIF',
-'/SAMPLING/05SIMOON/05_07.AIF',
-'/SAMPLING/05SIMOON/05_08.AIF',
-'/SAMPLING/06COSMIC/06_01.AIF',
-'/SAMPLING/06COSMIC/06_02.AIF',
-'/SAMPLING/07RYDEEN/07_01.AIF',
-'/SAMPLING/07RYDEEN/07_02.AIF',
-'/SAMPLING/07RYDEEN/07_03.AIF',
-'/SAMPLING/07RYDEEN/07_04.AIF',
-'/SAMPLING/07RYDEEN/07_05.AIF',
-'/SAMPLING/08TECHNO/08_01.AIF',
-'/SAMPLING/08TECHNO/08_02.AIF',
-'/SAMPLING/08TECHNO/08_03.AIF',
-'/SAMPLING/08TECHNO/08_04.AIF',
-'/SAMPLING/09BEHIND/09_01.AIF',
-'/SAMPLING/09BEHIND/09_02.AIF',
-'/SAMPLING/09BEHIND/09_03.AIF',
-'/SAMPLING/10CASTAL/10_01.AIF',
-'/SAMPLING/10CASTAL/10_02.AIF',
-'/SAMPLING/11SOLID/11_01.AIF',
-'/SAMPLING/11SOLID/11_02.AIF',
-'/SAMPLING/11SOLID/11_03.AIF',
-'/SAMPLING/11SOLID/11_04.AIF',
-'/SAMPLING/11SOLID/11_05.AIF',
-'/SAMPLING/11SOLID/11_06.AIF',
-'/SAMPLING/11SOLID/11_07.AIF',
-'/SAMPLING/12INSOMN/12_01.AIF',
-'/SAMPLING/12INSOMN/12_02.AIF',
-'/SAMPLING/13DAYTRI/13_01.AIF',
-'/SAMPLING/13DAYTRI/13_02.AIF',
-'/SAMPLING/13DAYTRI/13_03.AIF',
-'/SAMPLING/13DAYTRI/13_04.AIF',
-'/SAMPLING/14ABSOLU/14_01.AIF',
-'/SAMPLING/14ABSOLU/14_02.AIF',
-'/SAMPLING/14ABSOLU/14_03.AIF',
-'/SAMPLING/15MULTI/15_01.AIF',
-'/SAMPLING/16NICEAG/16_01.AIF',
-'/SAMPLING/16NICEAG/16_02.AIF',
-'/SAMPLING/17CITIZE/17_01.AIF',
-'/SAMPLING/18JINGLE/18_01.AIF',
-'/SAMPLING/19PRURJA/19_01.AIF',
-'/SAMPLING/19PRURJA/19_02.AIF',
-'/SAMPLING/19PRURJA/19_03.AIF',
-'/SAMPLING/19PRURJA/19_04.AIF',
-'/SAMPLING/19PRURJA/19_05.AIF',
-'/SAMPLING/19PRURJA/19_06.AIF',
-'/SAMPLING/20GRADAT/20_01.AIF',
-'/SAMPLING/20GRADAT/20_02.AIF',
-'/SAMPLING/21NEWTAN/21_01.AIF',
-'/SAMPLING/21NEWTAN/21_02.AIF',
-'/SAMPLING/21NEWTAN/21_03.AIF',
-'/SAMPLING/21NEWTAN/21_04.AIF',
-'/SAMPLING/21NEWTAN/21_05.AIF',
-'/SAMPLING/21NEWTAN/21_06.AIF',
-'/SAMPLING/21NEWTAN/21_07.AIF',
-'/SAMPLING/21NEWTAN/21_08.AIF',
-'/SAMPLING/22STAIRS/22_01.AIF',
-'/SAMPLING/22STAIRS/22_02.AIF',
-'/SAMPLING/23SEOULM/23_01.AIF',
-'/SAMPLING/23SEOULM/23_02.AIF',
-'/SAMPLING/23SEOULM/23_03.AIF',
-'/SAMPLING/23SEOULM/23_04.AIF',
-'/SAMPLING/24LIGHTI/24_01.AIF',
-'/SAMPLING/24LIGHTI/24_02.AIF',
-'/SAMPLING/25PROLOG/25_01.AIF',
-'/SAMPLING/25PROLOG/25_02.AIF',
-'/SAMPLING/25PROLOG/25_03.AIF',
-'/SAMPLING/26KEY/26_01.AIF',
-'/SAMPLING/26KEY/26_02.AIF',
-'/SAMPLING/26KEY/26_03.AIF',
-'/SAMPLING/26KEY/26_04.AIF',
-'/SAMPLING/27LIMBO/27_01.AIF',
-'/SAMPLING/28THEMAD/28_01.AIF',
-'/SAMPLING/28THEMAD/28_02.AIF',
-'/SAMPLING/28THEMAD/28_03.AIF',
-'/SAMPLING/29PERSPE/29_01.AIF'
+      // '/MOVIE/QT/TITLE.MOV',
+      // '/MOVIE/QT/START.MOV'
     ].forEach((p) => {
-      console.log(p);
       player.play(mainWindow,p);
     });
     //player.playEnd();
-
-    return player.playPromises;
-  }).then(()=>{
-    console.log('play end?.');
-    setTimeout(function wait (){
-      console.log(player.count);
-      if(player.count){
-        setTimeout(wait,1000);
-      } else {
-        player.clear();
-      }
-    },500);
+    return Promise.all([player.prepareCache('/MOVIE/SOUND/OPENING.AIF','.ogg','-a:b 256k'),player.playPromises]);
+  }).then((args)=>{
+    return player.wait().then(()=>args[0]);
+  })
+  .then((path_)=>{
+    console.log('play end.');
+    player.clear();
+    return new Promise ((resolve,reject)=>{
+      mainWindow.loadUrl('file://' + __dirname + '/../html/jingle.html');
+      mainWindow.webContents.on('did-finish-load', function() {
+        resolve(path_);
+      });    
+    });
+  })
+  .then((path_)=>{
+    console.log('loaded.');
+    mainWindow.webContents.send('play',path_);
   })
   .catch((e)=>{
     var dialog = require('dialog');

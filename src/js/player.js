@@ -25,27 +25,32 @@ class Player {
 	}
 	
 	// 動画ファイルのキャッシュ生成
-	makeVideoCache(window,pathFlagment){
+	makeVideoCache(pathFlagment,targetExt,option){
+		targetExt = targetExt || '.ogv';
+		option = option || '-qscale:v 10 -qscale:a 10 -codec:v libtheora';
 		var pathSrc = path.join(this.gigaCapsulePath,pathFlagment);
 		var ext = path.extname(pathFlagment);
-		var pathDest = path.join(this.cachePath,path.basename(pathFlagment.replace(/\//ig,'_'),ext) + '.mp4');
-		return this.makeCache(pathSrc,pathDest,this.playVideo_.bind(this,window,pathDest));
+		var pathDest = path.join(this.cachePath,path.basename(pathFlagment.replace(/\//ig,'_'),ext) + targetExt);
+		return this.makeCache(pathSrc,pathDest,option);
 	}
 
 	// オーディオファイルのキャッシュ生成
-	makeAudioCache(window,pathFlagment){
+	makeAudioCache(pathFlagment,targetExt,option){
+		targetExt = targetExt || '.opus';
 		var pathSrc = path.join(this.gigaCapsulePath,pathFlagment);
 		var ext = path.extname(pathFlagment);
-		var pathDest = path.join(this.cachePath,path.basename(pathFlagment.replace(/\//ig,'_'),ext) + '.opus');
-		return this.makeCache(pathSrc,pathDest,this.playAudio_.bind(this,window,pathDest));
+		var pathDest = path.join(this.cachePath,path.basename(pathFlagment.replace(/\//ig,'_'),ext) + targetExt);
+		return this.makeCache(pathSrc,pathDest,option);
 	}
 
-	makeCacheAndPlay (window,path_) {
+	makeCacheAndPlay (window,path_,targetExt,option) {
 		this.count++;
 		var ext = path.extname(path_).toUpperCase();
 		var this_ = this;
-		return this.cacheMakers[ext](window,path_)
-			.then((p)=>{
+		return this.cacheMakers[ext](path_,targetExt,option)
+			.then((pathDest)=>{
+				console.log(pathDest);
+				var p = this.playVideo_.bind(this,window,pathDest);
 				if(this.playPromises){
 					this.playPromises = this.playPromises
 					.then(p)
@@ -56,7 +61,11 @@ class Player {
 			});			
 	}
 
-
+	prepareCache(path_,targetExt,option){
+		var ext = path.extname(path_).toUpperCase();
+		return this.cacheMakers[ext](path_,targetExt,option);
+	}
+	
 	play(window,path_){
 		// Promiseのチェインを2つ（キャッシュチェイン、再生チェイン）作る
 		// 再生中に後続のデータのキャッシュを作れるようにするため
@@ -90,21 +99,21 @@ class Player {
 	// }
 
 	// コンテンツを再生可能な形式に変換し、キャッシュする
-	makeCache(src,dest,play_,option)
+	makeCache(src,dest,option)
 	{
+//		console.log(process.cwd());
 		option = option || '';
-		console.log(src,dest);
 		return access(dest,fs.F_OK)
-		.then(()=> Promise.resolve(play_),// resolve
+		.then(()=>Promise.resolve(dest),// resolve
 		()=>{// reject
 			// 作業中のファイルはテンポラリに保存
 			var tmpPath = path.join(this.workPath,path.basename(dest));
 			// ffmpegでファイル変換
-			return exec('ffmpeg.exe -y -loglevel fatal -i ' + src + ' ' + option + ' ' + tmpPath)
+			return exec(process.cwd() + '/ffmpeg/ffmpeg.exe -y -loglevel fatal -i ' + src + ' ' + option + ' ' + tmpPath)
 			// 変換からテンポラリから移動
 			.then(exec.bind(null,'cmd /c move /Y ' + tmpPath + ' ' + dest),(e)=>{console.log(e);})
 			// 変換後のファイル名を返す
-			.then(()=>Promise.resolve(play_));
+			.then(()=>Promise.resolve(dest));
 		}
 		);
 	}
@@ -136,6 +145,20 @@ class Player {
 		this.playPromises = null;
 		this.cachePromises = null;
 	}	
+	
+	wait(){
+		var this_ = this;
+		return new Promise((resolve,reject)=>{
+		setTimeout(function wait (){
+			console.log(this_.count);
+			if(this_.count){
+				setTimeout(wait,500);
+			} else {
+				resolve();
+			}
+		},500);
+		});
+	}
 };
 
 export default Player;
