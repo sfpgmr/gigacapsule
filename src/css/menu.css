@@ -1,0 +1,64 @@
+/* @font-face kit by Fonts2u (http://www.fonts2u.com) */
+ @font-face {font-family:"Technodelic";src:url("../fonts/technodelic.eot?") format("eot"),url("../fonts/technodelic.woff") format("woff"),url("../fonts/technodelic.ttf") format("truetype"),url("../fonts/technodelic.svg#Technodelic") format("svg");font-weight:normal;font-style:normal;}
+
+* {
+	font-family: 'Technodelic';
+	
+}
+
+html {
+	background:black;
+	opacity:0.0;
+	transition-property:background-color,opacity;
+	transition-duration: 0.5s;
+	&.open {
+		transition-duration: 2.0s;
+		opacity:1.0;
+		background:#ff4040;
+	}
+}
+body,body > div {
+	padding:0;
+	margin:0 auto;
+	width:600px;
+	height:768px;
+}
+
+body {
+	background:white;
+	color: black;
+}
+
+.close {
+	opacity:0;
+	background-color:white;
+}
+
+body > div > h1 {
+	margin:0;
+	padding:20px;
+}
+
+h1.center {
+	text-align:center;
+}
+
+button.menu {
+	background: white;
+	width:600px;
+	height:70px;
+	font-size:1.5rem;
+	margin:25px auto;
+	padding-top:15px;
+	padding-bottom:20px;
+	display:block;
+	border:1px solid white;
+	color:black;
+	transition:all 1s;
+	&:hover{
+		background:#ff4040;
+		color:white;
+		cursor:pointer;
+	}
+}
+

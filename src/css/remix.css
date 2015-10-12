@@ -1,9 +1,36 @@
-﻿/* @font-face kit by Fonts2u (http://www.fonts2u.com) */ 
 @font-face {font-family:"Technodelic";src:url("../fonts/technodelic.eot?") format("eot"),url("../fonts/technodelic.woff") format("woff"),url("../fonts/technodelic.ttf") format("truetype"),url("../fonts/technodelic.svg#Technodelic") format("svg");font-weight:normal;font-style:normal;}
 
 * {
-	font-family: 'Technodelic';
+	font-family: 'Meiryo UI';
 	background-color:black;
+	color:white;
+}
+
+.axis {
+	font-family: 'Meiryo',sans-serif;
+	font-size:8px;
+	-webkit-user-select:none;
+	.domain {
+		fill:none;
+		stroke: red;
+		stroke-opacity: .3;
+		stroke-width: 10px;
+		stroke-linecap: round;
+	}
+}
+
+.slider .handle {
+	fill: #555;
+	stroke: #222;
+	stroke-width: 1.25px;
+	cursor: pointer;
+}
+
+svg {
+	margin:0px;
+	padding:0px;
+	border:0px;
+	background-color:#222;
 }
 
 body {
@@ -12,20 +39,5 @@ body {
 	border:0px;
 	overflow: hidden;
 	background-color:black;
-}
-
-svg {
-	margin:0px;
-	padding:0px;
-	border:0px;
-	background-color:black;
-}
-
-*{
-	letter-spacing: 0.25rem;
-}
-body{
-	background:black;
-	color: white;
 }
 

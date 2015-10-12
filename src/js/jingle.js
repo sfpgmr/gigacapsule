@@ -25,6 +25,7 @@ function toArrayBuffer(buffer) {
     }
     return ab;
 }
+
 ipc.on('play',function(path){
 	playContents(path);
 });
@@ -195,11 +196,11 @@ tracks.addTrack([
 	[6.775,text(200,500,'Show!','red','240px')],
 	[7.367,text(10,300,'Oh!,','White','380px')],
 	[8.047,text(10,500,'the hottest thing','White','100px')],
-	[8.810,text(10,600,'of the world.','White','100px')],
+	[8.810,text(10,600,'of the world!','White','100px')],
 	[9.900,text(10,150,'Yellow ','White','200px')],
 	[11.132,text(10,350,'Magic ','White','200px')],
 	[11.343,text(200,400,'Music','red','240px')],
-	[12.072,text(10,550,'Orchestra','White','200px')],
+	[12.072,text(10,550,'Orchestra!','White','200px')],
 	[12.941,text(200,600,'Music','red','240px')],
 	[14.518,text(10,450,'Y.','red','320px',null,5000)],
 	[15.117,text(350,450,'M.','red','320px',null,5000)],
@@ -221,7 +222,6 @@ function text(x,y,mes,color,size,font,duration){
 			.style({'font-size':size,'font-family':fontCache})
 			.text(mes);
 			var box = text.node().getBBox();
-			console.log(box.width + ' ' + box.height);
 			var dx = box.width ;
 			var dy = box.height;
 			text.attr({x:x,y:y,fill:color,opacity:1.0,transform: 'translate(' + dx + ',' + dy + '),scale(' + scale + '),translate(' + (-dx) + ',' + (-dy) + ')'})
@@ -342,31 +342,47 @@ function playContents(path)
 			var end = false;
 			source.buffer = buffer;
 			source.connect(audioCtx.destination);
-			source.onended = ()=>
-			{
-				console.log('end');
-				end = true;
-				resolve();
-			} 
+			source.loop = false;
 			// アニメーションのスタート
 			svg = 
 				d3.select('body')
 				.append('svg')
 				.attr({'width':'1024px','height':'768px'});
 			source.start(0);
+			setTimeout(()=>{
+				source.stop(0);
+			},((source.buffer.duration / source.playbackRate.value) * 1000));
+			source.onended = function(e)
+			{
+				console.log('end');
+				end = true;
+//				resolve();
+			}
+			
+			d3.select(window).on('keydown',()=>{
+				source.stop();
+				end = true;
+			});
+			
+			d3.select(window).on('click',()=>{
+				source.stop();
+				end = true;
+			});
 			var startTime = audioCtx.currentTime - 0.1;
-			function animate()
+			(function animate()
 			{
 				var currentTime = audioCtx.currentTime - startTime;
 				tracks.sequence(currentTime);
 				if(!end){
 					requestAnimationFrame(animate);
+				} else{
+					resolve();
 				}
-			}
-			animate();
+			})();
 		});
 	})
 	.then(()=>{
+		ipc.send('end');
 	})
 	.catch((err)=>{console.log(err);});
 

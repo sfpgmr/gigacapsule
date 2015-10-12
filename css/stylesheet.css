@@ -1,4 +1,5 @@
-/* @font-face kit by Fonts2u (http://www.fonts2u.com) */ @font-face {font-family:"Technodelic";src:url("../fonts/technodelic.eot?") format("eot"),url("../fonts/technodelic.woff") format("woff"),url("../fonts/technodelic.ttf") format("truetype"),url("../fonts/technodelic.svg#Technodelic") format("svg");font-weight:normal;font-style:normal;}
+/* @font-face kit by Fonts2u (http://www.fonts2u.com) */ 
+@font-face {font-family:"Technodelic";src:url("../fonts/technodelic.eot?") format("eot"),url("../fonts/technodelic.woff") format("woff"),url("../fonts/technodelic.ttf") format("truetype"),url("../fonts/technodelic.svg#Technodelic") format("svg");font-weight:normal;font-style:normal;}
 
 * {
 	font-family: 'Technodelic';
@@ -19,3 +20,13 @@ svg {
 	border:0px;
 	background-color:black;
 }
+
+*{
+	letter-spacing:4px;
+	letter-spacing: 0.25rem;
+}
+body{
+	background:black;
+	color: white;
+}
+

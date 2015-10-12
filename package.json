@@ -6,7 +6,7 @@
   "scripts": {
     "test": "electron . --enable-logging",
     "start": "electron . ",
-    "build": "cd ./release && pack.cmd && cd ./"
+    "build": "cd ./release && pack.cmd && cd .."
   },
   "keywords": [
     "electron"
@@ -20,7 +20,7 @@
     "cssnano": "^2.6.1",
     "cssnext": "^1.8.4",
     "electron-packager": "^5.1.0",
-    "electron-prebuilt": "^0.33.6",
+    "electron-prebuilt": "^0.33.7",
     "gulp": "^3.9.0",
     "gulp-babel": "^5.2.1",
     "gulp-filter": "^3.0.1",
