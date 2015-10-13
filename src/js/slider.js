@@ -51,23 +51,23 @@ class Slider extends EventEmitter {
 		slider
 			.call(brush.event);
 		function brushed(){
-			var value = brush.extent()[1];
+			var value = brush.extent()[0];
 			console.log(value);
-			if(self.emit)
-				self.emit('change',brush.extent()[1]);
 	
 			if (d3.event.sourceEvent) { // not a programmatic event
 				value = yscale.invert(d3.mouse(this)[1]);
 				brush.extent([value, value]);
 			}
-	
+
+			if(self.emit)
+				self.emit('change',value);
 			handle.attr("y", yscale(value) - 15);
 		}
 	}
 
 	
 	get value (){
-		return this.brush.extent()[1];
+		return this.brush.extent()[0];
 	}
 	
 	set value (v) {

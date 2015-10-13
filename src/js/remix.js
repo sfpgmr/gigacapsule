@@ -1,7 +1,7 @@
 import Slider from '../js/slider.js';
 import ipc from 'ipc';
 import remote from 'remote';
-var fs = remote.require('fs');
+var fs = require('fs');
 import denodeify from '../js/denodeify.js';
 
 var readFile = denodeify(fs.readFile);
@@ -10,11 +10,12 @@ var resources = [];
 
 function toArrayBuffer(buffer) {
     var ab = new ArrayBuffer(buffer.length);
-    var view = new Uint8Array(ab);
-    for (var i = 0; i < buffer.length; ++i) {
+	var view = new Uint8Array(ab);
+	var len = buffer.length;
+    for (var i = 0; i < len; ++i) {
         view[i] = buffer[i];
     }
-    return ab;
+   return ab;
 }
 
 window.onload = ()=>{
@@ -43,7 +44,7 @@ window.onload = ()=>{
 		var sources = [];
 		
 		for(var i = 0;i < 7;++i){
-			promise = promise.then(readFile.bind(null,resources[i].path))
+			promise = promise.then(readFile.bind(null,resources[i + 28].path))
 			.then((data)=>{
 				return new Promise((resolve,reject)=>{
 					var ab = toArrayBuffer(data); 
@@ -61,8 +62,8 @@ window.onload = ()=>{
 					var gain = audioCtx.createGain();
 					source.connect(gain);
 					gain.connect(audioCtx.destination);
-					var slider = new Slider(svg,{x:50 + idx * 70,y:768 - 240});
-					gain.gain.value = slider.value = 0.5;
+					var slider = new Slider(svg,{x:50 + idx * 70,y:768 - 240,domain:[2.0,0.0]});
+					gain.gain.value = slider.value = 1.0;
 					slider.on('change',(v)=>{
 						gain.gain.value = v;
 					});
