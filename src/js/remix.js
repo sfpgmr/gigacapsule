@@ -39,12 +39,15 @@ window.onload = ()=>{
 
 		var svg = d3.select('body').append('svg')
 		.attr({width:1024,height:768});
+		// var slider = new Slider(svg,{x:50 + 70,y:768 - 240,domain:[2.0,0.0]});
+		// slider.value = 1.0;
+		
 		
 		var promise = Promise.resolve();
 		var sources = [];
 		
 		for(var i = 0;i < 7;++i){
-			promise = promise.then(readFile.bind(null,resources[i + 28].path))
+			promise = promise.then(readFile.bind(null,resources[i + 7].path))
 			.then((data)=>{
 				return new Promise((resolve,reject)=>{
 					var ab = toArrayBuffer(data); 
@@ -82,7 +85,7 @@ window.onload = ()=>{
 				s.start(current);
 			});
 		});
-	});
+	 });
 		
 	
 	// var slider = new Slider(svg,{x:50,y:768 - 220});

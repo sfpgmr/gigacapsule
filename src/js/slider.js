@@ -10,69 +10,60 @@ class Slider extends EventEmitter {
 		this.x = opt.x = opt.x || 0;
 		this.y = opt.y = opt.y || 0;
 
+		var drag = d3.behavior.drag()
+			.origin(function(d){return d;})
+			.on('drag',dragmove);
+			
 		var yscale = d3.scale.linear()
 		.domain(opt.domain || [1.0,0.0])
 		.range(opt.range || [0,200])
 		.clamp(opt.clamp || true);
 
 		this.yscale = yscale;
-		
-		var brush = d3.svg.brush()
-			.y(yscale)
-			.extent([0,0])
-			.on('brush',brushed);
-		this.brush = brush;
-			
+		this.value_ = yscale.invert(0);
+
 		var yAxis = d3.svg.axis()
 		.tickSize(0)
 		.ticks(0)
 		.scale(yscale)
 		.orient('left');
+
 		this.yAxis = yAxis;
 		
 		var g = 
 			selection.append('g')
 			.attr('transform','translate(' + opt.x + ',' + opt.y + ')');
 
-		g.append('g')
+		var slider = g.append('g')
 		.attr({'class':'y axis'})
 		.call(yAxis);
-
-		var slider = g.append('g')
-		.attr('class','slider')
-		.call(brush);
 		
-		this.slider = slider;
-		
-		var handle = slider.append('rect')
-		.attr({'class':'handle','width':50,'height':30,'x':-25});
-		this.handle = handle;
-
-		slider
-			.call(brush.event);
-		function brushed(){
-			var value = brush.extent()[0];
-			console.log(value);
-	
-			if (d3.event.sourceEvent) { // not a programmatic event
-				value = yscale.invert(d3.mouse(this)[1]);
-				brush.extent([value, value]);
-			}
-
-			if(self.emit)
-				self.emit('change',value);
-			handle.attr("y", yscale(value) - 15);
+		var handle = slider.selectAll('rect').data([{x:0,y:0}]).enter().append('rect')
+		    .attr({'class':'handle','width':50,'height':30,transform:'translate(-25,-15)'})
+			.call(drag);
+			
+		function dragmove(d){
+			d.y += d3.event.dy;
+			if(d.y < yscale.range()[0] ) d.y = yscale.range()[0];
+			if(d.y > yscale.range()[1] ) d.y = yscale.range()[1];
+			self.value_ = yscale.invert(d.y);
+			self.emit('change',self.value_);
+			d3.select(this).attr("y",d.y);
 		}
+		this.handle = handle;
+		
 	}
 
 	
 	get value (){
-		return this.brush.extent()[0];
+		return this.value_;
 	}
 	
 	set value (v) {
-		this.brush.extent([v,v]);
-		this.slider.call(this.brush.event);
+		var self = this;
+		this.value_ = v;
+		this.handle.attr('y',function(d){d.y = self.yscale(v);return d.y;});
+		console.log(this.yscale(v));
 	}
 }
 export default Slider;
